@@ -1,0 +1,3 @@
+[submodule "modules/math"]
+	path = modules/math
+	url = https://github.com/TimZoet/math-module.git
