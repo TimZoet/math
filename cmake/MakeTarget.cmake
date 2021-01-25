@@ -1,3 +1,6 @@
+# cmake-template
+# This file was last updated on 2020-12-26 (yyyy-mm-dd)
+
 define_property(GLOBAL PROPERTY TARGETS_ALL
 	BRIEF_DOCS "All targets"
     FULL_DOCS "All targets"
@@ -72,9 +75,9 @@ endfunction()
 function(make_parse)
 	cmake_parse_arguments(
         PARSED_ARGS
-        "DYNAMIC;EXAMPLE;STARTUP"
-        "NAME;TYPE;VERSION;FOLDER"
-        "HEADERS;SOURCES;DEPS_PUBLIC;DEPS_INTERFACE;DEPS_PRIVATE"
+        "DYNAMIC;EXAMPLE;STARTUP;WARNINGS;WERROR"
+        "NAME;TYPE;VERSION;FOLDER;OUTDIR"
+        "HEADERS;SOURCES;DEPS_PUBLIC;DEPS_INTERFACE;DEPS_PRIVATE;INCS_PUBLIC;INCS_INTERFACE;INCS_PRIVATE"
         ${ARGN}
     )
 	
@@ -97,6 +100,20 @@ function(make_parse)
 		set(STARTUP true PARENT_SCOPE)
 	else()
 		set(STARTUP false PARENT_SCOPE)
+	endif()
+	
+	# Get warnings flag.
+	if(PARSED_ARGS_WARNINGS)
+		set(WARNINGS true PARENT_SCOPE)
+	else()
+		set(WARNINGS false PARENT_SCOPE)
+	endif()
+	
+	# Get warnings as error flag.
+	if(PARSED_ARGS_WERROR)
+		set(WERROR true PARENT_SCOPE)
+	else()
+		set(WERROR false PARENT_SCOPE)
 	endif()
 	
 	# Get name.
@@ -133,6 +150,13 @@ function(make_parse)
 	else()
 		set(FOLDER ${PARSED_ARGS_FOLDER} PARENT_SCOPE)
 	endif()
+
+	# Get output subfolder.
+	if(NOT PARSED_ARGS_OUTDIR)
+		set(OUTDIR "" PARENT_SCOPE)
+	else()
+		set(OUTDIR ${PARSED_ARGS_OUTDIR} PARENT_SCOPE)
+	endif()
 	
 	# Get dependencies.
 	if(NOT PARSED_ARGS_DEPS_PUBLIC)
@@ -149,6 +173,23 @@ function(make_parse)
 		set(DEPS_PRIVATE "" PARENT_SCOPE)
 	else()
 		set(DEPS_PRIVATE "${PARSED_ARGS_DEPS_PRIVATE}" PARENT_SCOPE)
+	endif()
+	
+	# Get additional include directories.
+	if(NOT PARSED_ARGS_INCS_PUBLIC)
+		set(INCS_PUBLIC "" PARENT_SCOPE)
+	else()
+		set(INCS_PUBLIC "${PARSED_ARGS_INCS_PUBLIC}" PARENT_SCOPE)
+	endif()
+	if(NOT PARSED_ARGS_INCS_INTERFACE)
+		set(INCS_INTERFACE "" PARENT_SCOPE)
+	else()
+		set(INCS_INTERFACE "${PARSED_ARGS_INCS_INTERFACE}" PARENT_SCOPE)
+	endif()
+	if(NOT PARSED_ARGS_INCS_PRIVATE)
+		set(INCS_PRIVATE "" PARENT_SCOPE)
+	else()
+		set(INCS_PRIVATE "${PARSED_ARGS_INCS_PRIVATE}" PARENT_SCOPE)
 	endif()
 	
 	# Get headers and sources.
@@ -185,14 +226,23 @@ function(make_target)
 	#   application).
 	# EXAMPLE (option): Marks this target as an example. Adds an option to 
 	#   disable building of this specific target.
+	# WARNINGS (option) Enable highest warning level.
+	# WERROR (option): Treat warnings as errors.
 	# VERSION (value): Version of the target.
 	# FOLDER (value): Folder the target is placed in. If not provided, targets 
 	#   are placed in a folder based on their type.
+	# OUTDIR (value): Subfolder the binaries are placed in. Default empty.
 	# HEADERS (list): List of header files.
 	# SOURCES (list): List of source files.
 	# DEPS_PUBLIC (list): List of library targets that are linked with PUBLIC.
 	# DEPS_PRIVATE (list): List of library targets that are linked with PRIVATE.
 	# DEPS_INTERFACE (list): List of library targets that are linked with 
+	#   INTERFACE.
+	# INCS_PUBLIC (list): List of include directories that are added with 
+	#   PUBLIC.
+	# INCS_PRIVATE (list): List of include directories that are added with 
+	#   PRIVATE.
+	# INCS_INTERFACE (list): List of include directories that are added with
 	#   INTERFACE.
 	message(STATUS "start make_target()")
 	list(APPEND CMAKE_MESSAGE_INDENT "  ")
@@ -237,14 +287,38 @@ function(make_target)
 
 	# Set version and folder.
     set_target_properties(${NAME} PROPERTIES VERSION ${VERSION} FOLDER ${FOLDER})
+	
+	# Set warnings.
+	if (WARNINGS)
+		if (WERROR)
+			target_compile_options(${NAME} PRIVATE
+				$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+				$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic -Werror>
+			)
+		else()
+			target_compile_options(${NAME} PRIVATE
+				$<$<CXX_COMPILER_ID:MSVC>:/W4>
+				$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic>
+			)
+		endif()
+	endif()
     
     # Linking.
-    message(STATUS "Linking ${NAME} with PUBLIC [${DEPS_PUBLIC}] INTERFACE [${DEPS_INTERFACE}] PRIVATE [${DEPS_PRIVATE}]")
+    message(STATUS "Linking with: PUBLIC [${DEPS_PUBLIC}] INTERFACE [${DEPS_INTERFACE}] PRIVATE [${DEPS_PRIVATE}]")
     target_link_libraries(
         ${NAME}
         PUBLIC ${DEPS_PUBLIC}
         INTERFACE ${DEPS_INTERFACE}
         PRIVATE ${DEPS_PRIVATE}
+    )
+	
+	# Additional include directories.
+    message(STATUS "Additional include directories: PUBLIC [${INCS_PUBLIC}] INTERFACE [${INCS_INTERFACE}] PRIVATE [${INCS_PRIVATE}]")
+    target_include_directories(
+        ${NAME}
+        PUBLIC ${INCS_PUBLIC}
+        INTERFACE ${INCS_INTERFACE}
+        PRIVATE ${INCS_PRIVATE}
     )
     
     # Add own include directories to target.
@@ -255,9 +329,9 @@ function(make_target)
 
 	# Output directories.
 	set_target_properties(${NAME} PROPERTIES
-		ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+		ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${OUTDIR}"
+		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${OUTDIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/${OUTDIR}"
 	)
 
     # Create source groups.
