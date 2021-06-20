@@ -6,6 +6,7 @@ set(SRC_DIR "src")
 set(HEADERS
     ${INCLUDE_DIR}/vector_add.h
     ${INCLUDE_DIR}/vector_div.h
+    ${INCLUDE_DIR}/vector_equals.h
     ${INCLUDE_DIR}/vector_mul.h
     ${INCLUDE_DIR}/vector_sub.h
 )
@@ -14,6 +15,7 @@ set(SOURCES
     ${SRC_DIR}/main.cpp
     ${SRC_DIR}/vector_add.cpp
     ${SRC_DIR}/vector_div.cpp
+    ${SRC_DIR}/vector_equals.cpp
     ${SRC_DIR}/vector_mul.cpp
     ${SRC_DIR}/vector_sub.cpp
 )

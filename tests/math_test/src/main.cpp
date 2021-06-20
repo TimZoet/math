@@ -12,6 +12,7 @@
 
 #include "math_test/vector_add.h"
 #include "math_test/vector_div.h"
+#include "math_test/vector_equals.h"
 #include "math_test/vector_mul.h"
 #include "math_test/vector_sub.h"
 
@@ -32,6 +33,6 @@ int main(int argc, char** argv)
     }
 #endif
 
-    bt::run<VectorAdd, VectorDiv, VectorMul, VectorSub>(argc, argv, "cppql");
+    bt::run<VectorAdd, VectorDiv, VectorEquals, VectorMul, VectorSub>(argc, argv, "cppql");
     return 0;
 }
