@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # CMake modules.
 ################################################################################
 
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(InstallTarget)
 include(ISA)
 include(MakeTarget)
@@ -27,7 +27,6 @@ include(MakeTarget)
 
 add_subdirectory(modules)
 if (BUILD_TESTS)
-    add_subdirectory(external)
     add_subdirectory(tests)
 endif()
 

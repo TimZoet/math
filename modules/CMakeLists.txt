@@ -1,6 +1,1 @@
 add_subdirectory(math)
-if (BUILD_TESTS)
-    add_subdirectory(bettertest)
-    add_subdirectory(common)
-    add_subdirectory(parsertongue)
-endif()
