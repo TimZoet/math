@@ -1,5 +1,3 @@
-include(mathVersionString)
-
 set(NAME math)
 set(TYPE module)
 set(INCLUDE_DIR "include/math")
