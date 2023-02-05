@@ -26,7 +26,7 @@ class MathConan(ConanFile):
     
     def set_version(self):
         base = self.python_requires["pyreq"].module.BaseConan
-        base.set_version(self, "modules/math/mathVersionString.cmake", "MATH_VERSION")
+        base.set_version(self, "mathVersionString.cmake", "MATH_VERSION")
     
     def init(self):
         base = self.python_requires["pyreq"].module.BaseConan
