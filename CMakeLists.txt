@@ -9,14 +9,15 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "_CMakePredefinedTargets"
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/modules/math")
 include(mathVersionString)
 project(MathProject VERSION ${MATH_VERSION} LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 ################################################################################
 # CMake modules.
 ################################################################################
 
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(CMAKE_TEMPLATE_DIR "" CACHE PATH "Path to the cmake-template package directory")
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_BINARY_DIR};${CMAKE_TEMPLATE_DIR}")
 include(InstallTarget)
 include(ISA)
 include(MakeTarget)
@@ -29,10 +30,3 @@ add_subdirectory(modules)
 if (BUILD_TESTS)
     add_subdirectory(tests)
 endif()
-
-################################################################################
-# Set startup project.
-################################################################################
-
-get_property(STARTUP_PROJECT GLOBAL PROPERTY STARTUP_PROJECT)
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${STARTUP_PROJECT})
