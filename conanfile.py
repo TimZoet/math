@@ -11,12 +11,28 @@ class MathConan(ConanFile):
     description = "C++ math library."
     
     url = "https://github.com/TimZoet/math"
+    
+    @property
+    def user(self):
+        return getattr(self, "_user", "timzoet")
+    
+    @user.setter
+    def user(self, value):
+        self._user = value
+    
+    @property
+    def channel(self):
+        return getattr(self, "_channel", f"v{self.version}")
+    
+    @channel.setter
+    def channel(self, value):
+        self._channel = value
 
     ############################################################################
     ## Settings.                                                              ##
     ############################################################################
 
-    python_requires = "pyreq/1.0.0@timzoet/stable"
+    python_requires = "pyreq/1.0.1@timzoet/v1.0.1"
     
     python_requires_extend = "pyreq.BaseConan"
     
@@ -30,10 +46,8 @@ class MathConan(ConanFile):
     
     def init(self):
         base = self.python_requires["pyreq"].module.BaseConan
-        self.generators = base.generators + self.generators
-        self.settings = base.settings + self.settings
-        self.options = {**base.options, **self.options}
-        self.default_options = {**base.default_options, **self.default_options}
+        self.settings = base.settings
+        self.options.update(base.options, base.default_options)
     
     ############################################################################
     ## Building.                                                              ##
